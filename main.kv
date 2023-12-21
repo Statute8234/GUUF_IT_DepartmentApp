@@ -1,0 +1,155 @@
+Screen:
+    MDCard:
+        size_hint: None, None
+        size: 360, 640
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        elevation: 10
+        padding: 25
+        spacing: 25
+        orientation: 'vertical'
+        radius: [17, 17, 17, 17]
+
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: 10
+
+            MDRaisedButton:
+                id: login_button
+                text: "Login"
+                size_hint_y: None
+                padding_y: 15
+                md_bg_color: "green"
+                text_color: "black"
+                elevation: 5
+                on_press: app.loginScreen()
+
+            MDRaisedButton:
+                id: signUp_button
+                text: "Sign Up"
+                size_hint_y: None
+                padding_y: 15
+                md_bg_color: "red"
+                text_color: "black"
+                elevation: 5
+                on_press: app.signupScreen()
+
+        Widget:
+            size_hint_y: None
+            height: 40
+
+        MDLabel:
+            id: welcome_label
+            text: "Login"
+            font_size: 36
+            halign: 'center'
+            size_hint_y: None
+            height: self.texture_size[1]
+            padding_y: 15
+
+        Widget:
+            size_hint_y: None
+            height: 100
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 70
+
+            BoxLayout:
+                orientation: 'horizontal'
+                spacing: 20 
+                
+                MDLabel:
+                    id: username_label
+                    text: "Username"
+                    font_size: 18
+                    halign: 'left'
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    padding_y: 15
+
+                MDTextField:
+                    id: username_input
+                    hint_text: "Username"
+                    icon_left: "account"
+                    mode: "round"
+                    max_text_length: 150
+                    width: 200
+                    height: 50 
+                    size_hint_x: None
+                    size_hint_y: None
+                    padding_y: 150
+                    write_tab: False
+
+            BoxLayout:
+                orientation: 'horizontal'
+                spacing: 20 
+
+                MDLabel:
+                    id: password_label
+                    text: "Password"
+                    font_size: 18
+                    halign: 'left'
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    padding_y: 15
+
+                MDTextField:
+                    id: Password_input
+                    hint_text: "Password"
+                    icon_right: "eye-off"
+                    mode: "round"
+                    max_text_length: 150
+                    width: 200
+                    height: 50 
+                    size_hint_x: None
+                    size_hint_y: None
+                    padding_y: 15
+                    password: True
+                    on_text:  self.text = self.text.replace(" ", "")
+                    write_tab: False
+
+            BoxLayout:
+                orientation: 'horizontal'
+                spacing: 20 
+
+                MDCheckbox:
+                    id: rememberMe_checkBox
+                    size_hint: None, None
+                    width: 50
+                    height: 50
+                    pos_hint: {'center_y': 0.5}
+                
+                MDLabel:
+                    id: rememberMe_label
+                    text: "Remember Me"
+                    font_size: 18
+                    halign: 'left'
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    markup: True
+                    pos_hint: {'center_y': 0.5}
+
+        Widget:
+            size_hint_y: None
+            height: 70
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 40
+
+            MDFlatButton:
+                id: forgotPassword_button
+                text: "Forgot Password"
+                size_hint_y: None
+                height: 150  # Adjusted height
+                padding_y: 15
+                pos_hint: {'center_x': 0.5}
+                on_press: app.forgotPasswordScreen()
+
+            MDRaisedButton:
+                id: submit_button
+                text: "Submit"
+                size_hint_y: None
+                padding_y: 15
+                pos_hint: {'center_x': 0.5}
+                on_release: app.check_input()
