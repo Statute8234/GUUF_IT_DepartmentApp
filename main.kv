@@ -1,6 +1,7 @@
 WindowManager:
     LogInScreen:
     SignUpScreen:
+    ForgotPasswordScreen:
 
 <LogInScreen>:
     id: screen1
@@ -103,7 +104,7 @@ WindowManager:
             text: "Forgot Password"
             size_hint_y: None
             padding_y: 15
-            on_press: app.forgotPasswordScreen()
+            on_press: app.root.current = 'ForgotPasswordScreen'
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
         MDRaisedButton:
@@ -114,7 +115,7 @@ WindowManager:
             size_hint_x: 1
             radius: [19, 19, 19, 19]
             md_bg_color: "gray"
-            on_press: app.SignUpScreen()
+            on_press: app.root.current = 'SignUpScreen'
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         
         MDRaisedButton:
@@ -130,7 +131,12 @@ WindowManager:
 
 <SignUpScreen>
     id: screen2
-    name: 'SignUpScreenScreen'
+    name: 'SignUpScreen'
+
+    Image:
+        source: 'uua_rainbow_logo.jpg'
+        allow_stretch: True
+        keep_ratio: False
 
     MDCard:
         size_hint: None, None
@@ -141,3 +147,213 @@ WindowManager:
         spacing: 25
         orientation: 'vertical'
         radius: [17, 17, 17, 17]
+
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: 10
+
+            MDRaisedButton:
+                id: back_button
+                text: "Back"
+                size_hint_y: None
+                padding_y: 15
+                md_bg_color: "red"
+                text_color: "black"
+                on_press: app.root.current = 'LogInScreen'
+        
+        Image:
+            source: 'Untitled1.jpg'
+            size_hint: None, None
+            size: 100, 100
+            pos_hint: {"center_x": 0.5}
+
+        MDLabel:
+            id: welcome_label
+            text: "Sign Up"
+            font_size: 30
+            halign: 'center'
+            size_hint_y: None
+            height: self.texture_size[1]
+            padding_y: 15
+        
+        Widget:
+            size_hint_y: None
+            height: 20
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 70
+
+            BoxLayout:
+                orientation: 'horizontal'
+                spacing: 10 
+                
+                MDLabel:
+                    id: fullName_label
+                    text: "Full Name"
+                    font_size: 18
+                    halign: 'left'
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    padding_y: 15
+
+                MDTextField:
+                    id: fullName_input
+                    hint_text: "Full Name"
+                    icon_left: "account"
+                    mode: "round"
+                    max_text_length: 150
+                    width: 200
+                    height: 50 
+                    size_hint_x: None
+                    size_hint_y: None
+                    padding_y: 150
+                    write_tab: False
+            
+            BoxLayout:
+                orientation: 'horizontal'
+                spacing: 10 
+                
+                MDLabel:
+                    id: email_label
+                    text: "Email"
+                    font_size: 18
+                    halign: 'left'
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    padding_y: 15
+
+                MDTextField:
+                    id: email_input
+                    hint_text: "Email"
+                    icon_right: "email"
+                    mode: "round"
+                    max_text_length: 150
+                    width: 200
+                    height: 50 
+                    size_hint_x: None
+                    size_hint_y: None
+                    padding_y: 150
+                    write_tab: False
+
+        Widget:
+            size_hint_y: None
+            height: 90
+
+        MDRaisedButton:
+            id: signUp_button
+            text: "Sign Up"
+            size_hint_y: None
+            padding_y: 15
+            size_hint_x: 1
+            radius: [19, 19, 19, 19]
+            md_bg_color: "gray"
+            on_press: app.SignUpScreen()
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+        
+<ForgotPasswordScreen>
+    id: screen2
+    name: 'ForgotPasswordScreen'
+
+    Image:
+        source: 'uua_rainbow_logo.jpg'
+        allow_stretch: True
+        keep_ratio: False
+
+    MDCard:
+        size_hint: None, None
+        size: 360, 640
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        elevation: 5
+        padding: 25
+        spacing: 25
+        orientation: 'vertical'
+        radius: [17, 17, 17, 17]
+
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: 10
+
+            MDRaisedButton:
+                id: back_button
+                text: "Back"
+                size_hint_y: None
+                padding_y: 15
+                md_bg_color: "red"
+                text_color: "black"
+                on_press: app.root.current = 'LogInScreen'
+        
+        Image:
+            source: 'Untitled1.jpg'
+            size_hint: None, None
+            size: 100, 100
+            pos_hint: {"center_x": 0.5}
+
+        MDLabel:
+            id: welcome_label
+            text: "Forgot Password"
+            font_size: 30
+            halign: 'center'
+            size_hint_y: None
+            height: self.texture_size[1]
+            padding_y: 15
+        
+        Widget:
+            size_hint_y: None
+            height: 20
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 70
+
+            BoxLayout:
+                orientation: 'horizontal'
+                spacing: 10 
+                
+                MDLabel:
+                    id: username_label
+                    text: "Username"
+                    font_size: 18
+                    halign: 'left'
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    padding_y: 15
+
+                MDTextField:
+                    id: username_input
+                    hint_text: "Username"
+                    icon_left: "account"
+                    mode: "round"
+                    max_text_length: 150
+                    width: 200
+                    height: 50 
+                    size_hint_x: None
+                    size_hint_y: None
+                    padding_y: 150
+                    write_tab: False
+        
+            BoxLayout:
+                orientation: 'horizontal'
+                spacing: 10 
+                
+                MDLabel:
+                    id: email_label
+                    text: "Email"
+                    font_size: 18
+                    halign: 'left'
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    padding_y: 15
+
+                MDTextField:
+                    id: email_input
+                    hint_text: "Email"
+                    icon_right: "email"
+                    mode: "round"
+                    max_text_length: 150
+                    width: 200
+                    height: 50 
+                    size_hint_x: None
+                    size_hint_y: None
+                    padding_y: 150
+                    write_tab: False
