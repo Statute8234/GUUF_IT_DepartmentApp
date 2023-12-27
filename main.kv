@@ -248,7 +248,7 @@ WindowManager:
             size_hint_x: 1
             radius: [19, 19, 19, 19]
             md_bg_color: "gray"
-            on_press: app.SignUpScreen()
+            on_release: app.check_input()
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         
 <ForgotPasswordScreen>
@@ -357,3 +357,18 @@ WindowManager:
                     size_hint_y: None
                     padding_y: 150
                     write_tab: False
+
+        Widget:
+            size_hint_y: None
+            height: 90
+        
+        MDRaisedButton:
+            id: getPassword_button
+            text: "Get Password"
+            size_hint_y: None
+            padding_y: 15
+            size_hint_x: 1
+            radius: [19, 19, 19, 19]
+            md_bg_color: "gray"
+            on_release: app.check_input()
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
