@@ -4,9 +4,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen, RiseInTransition
 from kivy.core.window import Window
 from kivymd.toast import toast
 # ----
-from werkzeug.security import generate_password_hash, check_password_hash
 import string
-users = {}
 
 class WindowManager(ScreenManager):
     pass
@@ -52,40 +50,34 @@ class MainApp(MDApp):
             self.SignupEmail = self.SignupEmail_input.text
             self.check_SignUpScreen()
             
-        print(current_screen)
     def check_LogInScreen(self):
-        if not self.username or all(char in string.whitespace + string.punctuation for char in self.username):
+        if not self.LoginUsername or all(char in string.whitespace + string.punctuation for char in self.LoginUsername):
             self.show_notification(True)
 
-        elif not self.SignupEmail:
+        elif not self.LoginPassword:
             self.show_notification(True)
 
-        elif not self.password:
-            self.show_notification(True)
-
-        elif users and check_password_hash(users['password'], self.password):
-            self.show_notification(False)
         else:
-            self.show_notification(True)
+            self.show_notification(False)
         self.clear_input()
 
     def check_ForgotScreen(self):
         if not self.forgotUsername or all(char in string.whitespace + string.punctuation for char in self.forgotUsername):
             self.show_notification(True)
 
-        elif users and check_password_hash(users['email'], self.forgotEmail):
-            self.show_notification(False)
-        else:
+        elif not self.forgotUsername:
             self.show_notification(True)
+
+        elif not self.forgotEmail:
+            self.show_notification(True)
+
+        else:
+            self.show_notification(False)
         self.clear_input()
     
     def check_SignUpScreen(self): # --
         if not self.SignupFullName or all(char in string.whitespace + string.punctuation for char in self.SignupFullName):
             self.show_notification(True)
-
-        elif users is None or not check_password_hash(users.get('email'), self.SignupEmail):
-            self.show_notification(True)
-        self.clear_input()
 
     def show_notification(self, check):
         if (check):
