@@ -3,9 +3,64 @@ from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager, Screen, RiseInTransition
 from kivy.core.window import Window
 from kivymd.toast import toast
+from kivymd.uix.button import MDFloatingActionButton
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.button import MDRoundFlatButton
+from kivymd.uix.filemanager import MDFileManager
+from kivymd.uix.snackbar import Snackbar
 # ----
 import string
+import bcrypt, secrets
+import sqlite3
+import os
+# create data base
+conn = sqlite3.connect('employee.db')
+cursorDB = conn.cursor()
+def createDB():
+    try:
+        cursorDB.execute('''CREATE TABLE employee  (
+                        username text,
+                        email text,
+                        password text,
+                        full name text
+                    )''')
+    except:
+        pass
+createDB()
 
+# bcrypt
+def generate_random_username(length=8):
+    return ''.join(secrets.choice(string.ascii_letters) for _ in range(length))
+
+def generate_random_password(length=12):
+    password_characters = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(secrets.choice(password_characters) for _ in range(length))
+
+def hash_password(password):
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed_password
+
+def verify_password(password, hashed_password):
+    try:
+        return bcrypt.checkpw(password.encode('utf-8'), hashed_password)
+    except:
+        return password == hashed_password
+
+# db create
+def addEmployeeInfoDB(username, email, fullName):
+    password = str(generate_random_password())
+    cursorDB.execute("INSERT INTO employee VALUES (?, ?, ?, ?)", (username, email, password, fullName))
+    print("added new person")
+    conn.commit()
+    conn.close()
+    print(password)
+
+def findEmployeeInfoDB(username):
+    cursorDB.execute(f"SELECT * FROM employee WHERE username='{username}'")
+    return cursorDB.fetchone()
+
+# -------------- APP
 class WindowManager(ScreenManager):
     pass
 
@@ -18,13 +73,17 @@ class SignUpScreen(Screen):
 class ForgotPasswordScreen(Screen):
     pass
 
+class UserScreen(Screen):
+    pass
+
 class MainApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Light"
         self.theme_cls.primary_palette = "BlueGray"
-        WM = WindowManager()
-        WM.add_widget(LogInScreen(name='LogInScreen'))
-        WM.add_widget(SignUpScreen(name='SignUpScreen'))
+        self.WM = WindowManager()
+        self.WM.add_widget(LogInScreen(name='LogInScreen'))
+        self.WM.add_widget(SignUpScreen(name='SignUpScreen'))
+        self.WM.add_widget(UserScreen(name='UserScreen'))
         return Builder.load_file('main.kv')
 
     def check_input(self):
@@ -49,35 +108,63 @@ class MainApp(MDApp):
             self.SignupFullName = self.SignupFullName_input.text
             self.SignupEmail = self.SignupEmail_input.text
             self.check_SignUpScreen()
-            
+    
     def check_LogInScreen(self):
+        serch = findEmployeeInfoDB(self.LoginUsername)
         if not self.LoginUsername or all(char in string.whitespace + string.punctuation for char in self.LoginUsername):
+            self.show_notification(True)
+        
+        elif not self.LoginUsername:
             self.show_notification(True)
 
         elif not self.LoginPassword:
             self.show_notification(True)
+        
+        elif serch == None or not((serch[0] == self.LoginUsername) and verify_password(serch[2],self.LoginPassword)):
+            self.show_notification(True)
 
         else:
             self.show_notification(False)
+            self.root.current = 'UserScreen'
         self.clear_input()
 
     def check_ForgotScreen(self):
-        if not self.forgotUsername or all(char in string.whitespace + string.punctuation for char in self.forgotUsername):
+        serch = findEmployeeInfoDB(self.forgotUsername)
+        if not self.forgotUsername  or all(char in string.whitespace + string.punctuation for char in self.forgotUsername):
             self.show_notification(True)
-
+        
         elif not self.forgotUsername:
             self.show_notification(True)
 
         elif not self.forgotEmail:
             self.show_notification(True)
-
+        
+        elif serch == None or not((serch[0] == self.forgotUsername) and (serch[1] == self.forgotEmail)):
+            self.show_notification(True)
+            
         else:
             self.show_notification(False)
+            self.root.current = 'UserScreen'
         self.clear_input()
-    
-    def check_SignUpScreen(self): # --
-        if not self.SignupFullName or all(char in string.whitespace + string.punctuation for char in self.SignupFullName):
+
+    def check_SignUpScreen(self):
+        serch = findEmployeeInfoDB(self.SignupFullName)
+        if not self.SignupFullName:
             self.show_notification(True)
+
+        elif not self.SignupEmail:
+            self.show_notification(True)
+
+        elif serch:
+            self.show_notification(True)
+            
+        else:
+            self.show_notification(False)
+            newUsername = self.SignupFullName
+            addEmployeeInfoDB(newUsername,self.SignupEmail,self.SignupFullName)
+            self.root.current = 'UserScreen'
+
+        self.clear_input()
 
     def show_notification(self, check):
         if (check):
@@ -103,7 +190,6 @@ class MainApp(MDApp):
             self.SignupEmail_input.text = ''
         except AttributeError:
             pass
-
 
 if __name__ == '__main__':
     Window.size = (360, 640)
