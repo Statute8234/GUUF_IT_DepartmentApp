@@ -2,6 +2,7 @@ WindowManager:
     LogInScreen:
     SignUpScreen:
     ForgotPasswordScreen:
+    UserScreen:
 
 <LogInScreen>:
     id: screen1
@@ -252,7 +253,7 @@ WindowManager:
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         
 <ForgotPasswordScreen>
-    id: screen2
+    id: screen3
     name: 'ForgotPasswordScreen'
 
     Image:
@@ -372,3 +373,22 @@ WindowManager:
             md_bg_color: "gray"
             on_release: app.check_input()
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+<UserScreen>
+    id: screen4
+    name: 'UserScreen'
+
+    MDCard:
+        size_hint: None, None
+        size: 360, 640
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        elevation: 5
+        padding: 25
+        spacing: 25
+        orientation: 'vertical'
+        radius: [17, 17, 17, 17]
+    
+        MDFloatingActionButton:
+            icon: 'camera'
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            on_release: app.show_file_chooser()
