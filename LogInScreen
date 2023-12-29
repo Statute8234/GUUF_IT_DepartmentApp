@@ -2,15 +2,16 @@ from kivy.lang import Builder
 from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager, Screen, RiseInTransition
 from kivy.core.window import Window
-from kivymd.toast import toast
+from kivymd.toast import toasta
 from kivymd.uix.filemanager import MDFileManager
+from kivymd.icon_definitions import md_icons
+from kivymd.uix.list import OneLineIconListItem
 # ----
 import string
 import bcrypt, secrets
 import sqlite3
 import os
 # --- hand made files
-from UserAccount import show_file_chooser, exit_manager, select_path
 
 # create data base
 conn = sqlite3.connect('employee.db')
@@ -21,7 +22,8 @@ def createDB():
                         username text,
                         email text,
                         password text,
-                        full name text
+                        full name text,
+                        synced INTEGER DEFAULT 0
                     )''')
     except:
         pass
@@ -49,7 +51,7 @@ def verify_password(password, hashed_password):
 # db create
 def addEmployeeInfoDB(username, email, fullName):
     password = str(generate_random_password())
-    cursorDB.execute("INSERT INTO employee VALUES (?, ?, ?, ?)", (username, email, password, fullName))
+    cursorDB.execute("INSERT INTO employee VALUES (?, ?, ?, ?, ?)", (username, email, password, fullName, 0))
     print("added new person")
     conn.commit()
     conn.close()
