@@ -377,6 +377,20 @@ WindowManager:
 <UserScreen>
     id: screen4
     name: 'UserScreen'
+    
+    MDScreen:
+        MDTopAppBar:
+            title: "Navigation Drawer"
+            elevation: 10
+            pos_hint: {"top": 1}
+            md_bg_color: "white"
+            specific_text_color: "black"
+            left_action_items:
+                [['menu', lambda x: nav_drawer.set_state("open")]]
+        
+        MDNavigationDrawer:
+            id: nav_drawer
+            radius: (0, 16, 16, 0)
 
     MDCard:
         size_hint: None, None
@@ -389,6 +403,102 @@ WindowManager:
         radius: [17, 17, 17, 17]
     
         MDFloatingActionButton:
-            icon: 'camera'
+            id: profile_image
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            on_release: app.show_file_chooser()
+            source: 'user.png'
+            on_release: app.file_manager_open()
+        
+        MDLabel:
+            id: fullname_label
+            text: "Full Name"
+            font_size: 36
+            halign: 'center'
+            size_hint_y: None
+            height: self.texture_size[1]
+            padding_y: 15
+
+        Widget:
+            size_hint_y: None
+            height: 20
+
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: 10
+            
+            MDRaisedButton:
+                id: logout_button
+                text: "Logout"
+                md_bg_color: "red"
+                size_hint_y: None
+                padding_y: 15
+                on_press: app.root.current = 'LogInScreen'
+
+            MDRaisedButton:
+                id: edit_button
+                text: "Edit"
+                size_hint_y: None
+                padding_y: 15
+        
+        ScrollView:
+            size_hint_y: None
+            height: "300dp"
+            
+            GridLayout:
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: 10
+
+                MDTextField:
+                    id: position_input
+                    hint_text: "Position"
+                    icon_left: "account"
+                    padding_y: 150
+                    write_tab: False
+
+                MDTextField:
+                    id: fullName_input
+                    hint_text: "Full Name"
+                    icon_left: "account"
+                    padding_y: 150
+                    write_tab: False
+                
+                MDTextField:
+                    id: username_input
+                    hint_text: "Username"
+                    icon_left: "account"
+                    padding_y: 150
+                    write_tab: False
+                
+                MDTextField:
+                    id: email_input
+                    hint_text: "Email"
+                    icon_left: "email"
+                    padding_y: 150
+                    write_tab: False
+                
+                MDTextField:
+                    id: about_input
+                    hint_text: "About"
+                    helper_text_mode: "on_focus"
+                    size_hint_y: None
+                    height: "200dp"
+                    padding_y: 150
+                    write_tab: False
+
+                MDTextField:
+                    id: password_input
+                    hint_text: "Password"
+                    icon_right: "eye-off"
+                    size_hint_y: None
+                    assword: True
+                    on_text:  self.text = self.text.replace(" ", "")
+                    padding_y: 150
+                    write_tab: False
+
+                MDRaisedButton:
+                    id: delete_button
+                    text: "Delete"
+                    md_bg_color: "red"
+                    size_hint_y: None
+                    padding_y: 15
