@@ -3,16 +3,15 @@ from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager, Screen, RiseInTransition
 from kivy.core.window import Window
 from kivymd.toast import toast
-from kivymd.uix.button import MDFloatingActionButton
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.button import MDRoundFlatButton
 from kivymd.uix.filemanager import MDFileManager
-from kivymd.uix.snackbar import Snackbar
 # ----
 import string
 import bcrypt, secrets
 import sqlite3
 import os
+# --- hand made files
+from UserAccount import show_file_chooser, exit_manager, select_path
+
 # create data base
 conn = sqlite3.connect('employee.db')
 cursorDB = conn.cursor()
@@ -80,6 +79,11 @@ class MainApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Light"
         self.theme_cls.primary_palette = "BlueGray"
+        self.file_manager = MDFileManager(
+            exit_manager=self.exit_manager,
+            select_path=self.select_path,
+            preview=True,
+        )
         self.WM = WindowManager()
         self.WM.add_widget(LogInScreen(name='LogInScreen'))
         self.WM.add_widget(SignUpScreen(name='SignUpScreen'))
@@ -190,6 +194,23 @@ class MainApp(MDApp):
             self.SignupEmail_input.text = ''
         except AttributeError:
             pass
+    
+    # user Form -------------------
+    def file_manager_open(self):
+        self.file_manager.show('/')
+        
+    def exit_manager(self, *args):
+        self.file_manager.close()
+    
+    def select_path(self, path):
+        if os.path.isdir(path):
+            files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+            image_files = [f for f in files if f.endswith(('.png', '.jpg', '.jpeg'))]
+            if image_files:
+                image_path = os.path.join(path, image_files[0])
+                self.root.ids.image_widget.source = image_path
+
+        self.exit_manager()
 
 if __name__ == '__main__':
     Window.size = (360, 640)
