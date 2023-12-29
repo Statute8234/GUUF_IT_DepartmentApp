@@ -378,127 +378,103 @@ WindowManager:
     id: screen4
     name: 'UserScreen'
     
-    MDScreen:
-        MDTopAppBar:
-            title: "Navigation Drawer"
-            elevation: 10
-            pos_hint: {"top": 1}
-            md_bg_color: "white"
-            specific_text_color: "black"
-            left_action_items:
-                [['menu', lambda x: nav_drawer.set_state("open")]]
-        
-        MDNavigationDrawer:
-            id: nav_drawer
-            radius: (0, 16, 16, 0)
-
-    MDCard:
-        size_hint: None, None
-        size: 360, 640
-        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+    MDTopAppBar:
+        title: "Navigation"
         elevation: 5
-        padding: 25
-        spacing: 25
-        orientation: 'vertical'
-        radius: [17, 17, 17, 17]
-    
-        MDFloatingActionButton:
-            id: profile_image
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            source: 'user.png'
-            on_release: app.file_manager_open()
+        pos_hint: {"top": 1}
+        md_bg_color: "white"
+        specific_text_color: "black"
+        left_action_items:
+            [['menu', lambda x: nav_drawer.set_state("open")]]
         
-        MDLabel:
-            id: fullname_label
-            text: "Full Name"
-            font_size: 36
-            halign: 'center'
-            size_hint_y: None
-            height: self.texture_size[1]
-            padding_y: 15
+    MDNavigationDrawer:
+        id: nav_drawer
+        md_bg_color: "white"
+        radius: (0, 16, 16, 0)
 
-        Widget:
-            size_hint_y: None
-            height: 20
+        MDNavigationDrawerMenu:
 
-        BoxLayout:
-            orientation: 'horizontal'
-            spacing: 10
+            MDNavigationDrawerHeader:
+                text: "Navigation"
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, 1
             
-            MDRaisedButton:
-                id: logout_button
-                text: "Logout"
-                md_bg_color: "red"
-                size_hint_y: None
-                padding_y: 15
-                on_press: app.root.current = 'LogInScreen'
+            MDNavigationDrawerDivider:
 
-            MDRaisedButton:
-                id: edit_button
-                text: "Edit"
-                size_hint_y: None
-                padding_y: 15
+            MDNavigationDrawerLabel:
+                text: "Manual"
+            
+            MDNavigationDrawerItem:
+                icon: "desktop-classic"
+                text: "AnyDesk Manual"
+                md_bg_color: 0.5, 0.5, 0.5, 1
+
+            MDNavigationDrawerItem:
+                icon: "file-document-outline"
+                text: "Blackmagic ATEM SDI Switcher Manual"
+                md_bg_color: 0.5, 0.5, 0.5, 1
+            
+            MDNavigationDrawerItem:
+                icon: "file-document-outline"
+                text: "Blackmagic ATEM Software Control Manual"
+                md_bg_color: 0.5, 0.5, 0.5, 1
+            
+            MDNavigationDrawerItem:
+                icon: "microsoft-excel"
+                text: "Microsoft Excel Manual"
+                md_bg_color: 0.5, 0.5, 0.5, 1
+            
+            MDNavigationDrawerItem:
+                icon: "presentation"
+                text: "PowerPoint Manual"
+                md_bg_color: 0.5, 0.5, 0.5, 1
+            
+            MDNavigationDrawerItem:
+                icon: "television"
+                text: "XSplit Manual"
+                md_bg_color: 0.5, 0.5, 0.5, 1
+
+            MDNavigationDrawerItem:
+                icon: "youtube"
+                text: "YouTube Manual"
+                md_bg_color: 0.5, 0.5, 0.5, 1
+
+            MDNavigationDrawerDivider:
+
+            MDNavigationDrawerLabel:
+                text: "Tools"
+            
+            MDNavigationDrawerItem:
+                icon: "calendar"
+                text: "Calendar"
+                md_bg_color: 0.5, 0.5, 0.5, 1
+            
+            MDNavigationDrawerItem:
+                icon: "message"
+                text: "Messaging softwere"
+                md_bg_color: 0.5, 0.5, 0.5, 1
+            
+            MDNavigationDrawerItem:
+                icon: "microphone"
+                text: "Microphone Data Sheet"
+                md_bg_color: 0.5, 0.5, 0.5, 1
+
+            MDNavigationDrawerItem:
+                icon: "microphone"
+                text: "Microphone Input List"
+                md_bg_color: 0.5, 0.5, 0.5, 1
+
+            MDNavigationDrawerItem:
+                icon: "script-text"
+                text: "Script Maker"
+                md_bg_color: 0.5, 0.5, 0.5, 1
         
-        ScrollView:
-            size_hint_y: None
-            height: "300dp"
+            MDNavigationDrawerDivider:
             
-            GridLayout:
-                cols: 1
-                size_hint_y: None
-                height: self.minimum_height
-                spacing: 10
-
-                MDTextField:
-                    id: position_input
-                    hint_text: "Position"
-                    icon_left: "account"
-                    padding_y: 150
-                    write_tab: False
-
-                MDTextField:
-                    id: fullName_input
-                    hint_text: "Full Name"
-                    icon_left: "account"
-                    padding_y: 150
-                    write_tab: False
-                
-                MDTextField:
-                    id: username_input
-                    hint_text: "Username"
-                    icon_left: "account"
-                    padding_y: 150
-                    write_tab: False
-                
-                MDTextField:
-                    id: email_input
-                    hint_text: "Email"
-                    icon_left: "email"
-                    padding_y: 150
-                    write_tab: False
-                
-                MDTextField:
-                    id: about_input
-                    hint_text: "About"
-                    helper_text_mode: "on_focus"
-                    size_hint_y: None
-                    height: "200dp"
-                    padding_y: 150
-                    write_tab: False
-
-                MDTextField:
-                    id: password_input
-                    hint_text: "Password"
-                    icon_right: "eye-off"
-                    size_hint_y: None
-                    assword: True
-                    on_text:  self.text = self.text.replace(" ", "")
-                    padding_y: 150
-                    write_tab: False
-
-                MDRaisedButton:
-                    id: delete_button
-                    text: "Delete"
-                    md_bg_color: "red"
-                    size_hint_y: None
-                    padding_y: 15
+            MDNavigationDrawerLabel:
+                text: "Account"
+            
+            MDNavigationDrawerItem:
+                icon: "account"
+                text: "Profile"
+                md_bg_color: 0.5, 0.5, 0.5, 1
