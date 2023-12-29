@@ -2,7 +2,7 @@ from kivy.lang import Builder
 from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager, Screen, RiseInTransition
 from kivy.core.window import Window
-from kivymd.toast import toasta
+from kivymd.toast import toast
 from kivymd.uix.filemanager import MDFileManager
 from kivymd.icon_definitions import md_icons
 from kivymd.uix.list import OneLineIconListItem
