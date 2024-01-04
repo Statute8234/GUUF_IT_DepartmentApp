@@ -1,57 +1,48 @@
-"""import sqlite3
-
-conn = sqlite3.connect('employee.db')
-cursorDB = conn.cursor()
-def create():
-    cursorDB.execute('''CREATE TABLE employee  (
-                        username text,
-                        email text,
-                        password text,
-                        full name text
-                    )''')
-create()
-cursorDB.execute("INSERT INTO employee VALUES ('admin', 'admin_email@gmail.com', 'admin', 'admin admin')")
-cursorDB.execute("SELECT * FROM employee WHERE username='admin'")
-print(cursorDB.fetchall())
-conn.commit()
-conn.close()"""
-
-import sqlite3
-
-"""def clear_table():
-    conn = sqlite3.connect('employee.db')  # Replace 'your_database.db' with the actual name of your SQLite database
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute("DELETE FROM employee")  # Replace 'your_table_name' with the actual name of your table
-        conn.commit()
-        print("All records cleared successfully.")
-    except sqlite3.Error as e:
-        print("Error:", e)
-    finally:
-        conn.close()
-
-clear_table()"""
-
 import requests
 import sqlite3
+import os
 
-local_database = sqlite3.connect('employee.db')
+# connect
+def authenticate(username, email, password, full_name):
+    url = 'http://127.0.0.1:5000/authenticate'  # Replace with your server's IP address or domain
 
-def sync_data():
-    # Retrieve local changes
-    cursor = local_database.cursor()
-    cursor.execute('SELECT * FROM employee WHERE synced = 0')
-    local_changes = cursor.fetchall()
+    data = {
+        'username': username,
+        'email': email,
+        'password': password,
+        'full_name': full_name
+    }
 
-    # Synchronize with the central database
-    try:
-        response = requests.post('http://your-api-endpoint/sync', json=local_changes)
-        if response.json()['status'] == 'success':
-            # Update local changes as synced
-            cursor.execute('UPDATE employee SET synced = 1 WHERE synced = 0')
-            local_database.commit()
-    except Exception as e:
-        print(f'Synchronization error: {e}')
+    response = requests.post(url, json=data)
 
-sync_data()
+    if response.status_code == 200:
+        result = response.json()
+        print(result['message'])
+    else:
+        print("Error:", response.text)
+# Example usage
+username_input = input("Enter username: ")
+email_input = input("Enter email: ")
+password_input = input("Enter password: ")
+fullName_input = input("Enter full name: ")
+
+conn = sqlite3.connect('local_database.db')
+cursor = conn.cursor()
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS local_users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        email TEXT UNIQUE,
+        password TEXT,
+        full_name TEXT
+    )
+''')
+
+try:
+    cursor.execute("INSERT INTO local_users (username, email, password, full_name) VALUES (?, ?, ?, ?)",(username_input, email_input, password_input, fullName_input))
+    conn.commit()
+    print("Registration saved locally.")
+except sqlite3.IntegrityError:
+    print("Username or email already exists locally.")
+conn.close()
+authenticate(username_input, email_input, password_input, fullName_input)
