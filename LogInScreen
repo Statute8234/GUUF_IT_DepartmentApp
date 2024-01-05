@@ -6,62 +6,43 @@ from kivymd.toast import toast
 from kivymd.uix.filemanager import MDFileManager
 from kivymd.icon_definitions import md_icons
 from kivymd.uix.list import OneLineIconListItem
-# ----
-import string
-import bcrypt, secrets
+#--- 
+import requests
 import sqlite3
 import os
-# --- hand made files
+import string
+import re
 
-# create data base
-conn = sqlite3.connect('employee.db')
-cursorDB = conn.cursor()
-def createDB():
+# check email
+def is_valid_email(email):
+    pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    return re.match(pattern, email) is not None
+
+# connect
+def authenticate(username = "", email = "", password = "", full_name = ""):
+    url = 'http://127.0.0.1:5000/authenticate'  # Replace with your server's IP address or domain
+
+    data = {
+        'username': username,
+        'email': email,
+        'password': password,
+        'full_name': full_name
+    }
+
     try:
-        cursorDB.execute('''CREATE TABLE employee  (
-                        username text,
-                        email text,
-                        password text,
-                        full name text,
-                        synced INTEGER DEFAULT 0
-                    )''')
-    except:
-        pass
-createDB()
+        response = requests.post(url, json=data)
 
-# bcrypt
-def generate_random_username(length=8):
-    return ''.join(secrets.choice(string.ascii_letters) for _ in range(length))
+        if response.status_code == 200:
+            result = response.json()
+            if result.get('status') == 'success':
+                return True
+            else:
+                return False
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+        return False
+    
 
-def generate_random_password(length=12):
-    password_characters = string.ascii_letters + string.digits + string.punctuation
-    return ''.join(secrets.choice(password_characters) for _ in range(length))
-
-def hash_password(password):
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed_password
-
-def verify_password(password, hashed_password):
-    try:
-        return bcrypt.checkpw(password.encode('utf-8'), hashed_password)
-    except:
-        return password == hashed_password
-
-# db create
-def addEmployeeInfoDB(username, email, fullName):
-    password = str(generate_random_password())
-    cursorDB.execute("INSERT INTO employee VALUES (?, ?, ?, ?, ?)", (username, email, password, fullName, 0))
-    print("added new person")
-    conn.commit()
-    conn.close()
-    print(password)
-
-def findEmployeeInfoDB(username):
-    cursorDB.execute(f"SELECT * FROM employee WHERE username='{username}'")
-    return cursorDB.fetchone()
-
-# -------------- APP
 class WindowManager(ScreenManager):
     pass
 
@@ -74,23 +55,18 @@ class SignUpScreen(Screen):
 class ForgotPasswordScreen(Screen):
     pass
 
-class UserScreen(Screen):
-    pass
 
 class MainApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Light"
         self.theme_cls.primary_palette = "BlueGray"
-        self.file_manager = MDFileManager(
-            exit_manager=self.exit_manager,
-            select_path=self.select_path,
-            preview=True,
-        )
         self.WM = WindowManager()
         self.WM.add_widget(LogInScreen(name='LogInScreen'))
         self.WM.add_widget(SignUpScreen(name='SignUpScreen'))
-        self.WM.add_widget(UserScreen(name='UserScreen'))
         return Builder.load_file('main.kv')
+
+    def on_start(self):
+        self.icon = "channels4_profile-fotor-bg-remover-20240104154756.png"
 
     def check_input(self):
         current_screen = self.root.current
@@ -100,24 +76,27 @@ class MainApp(MDApp):
             self.LoginUsername = self.LoginUsername_input.text
             self.LoginPassword = self.LoginPassword_input.text
             self.check_LogInScreen()
-        
+
         if (current_screen == "ForgotPasswordScreen"):
             self.forgotUsername_input = self.root.get_screen('ForgotPasswordScreen').ids.username_input
             self.forgotEmail_input = self.root.get_screen('ForgotPasswordScreen').ids.email_input
             self.forgotUsername = self.forgotUsername_input.text
             self.forgotEmail = self.forgotEmail_input.text
             self.check_ForgotScreen()
-        
+
         if (current_screen == "SignUpScreen"):
             self.SignupFullName_input = self.root.get_screen('SignUpScreen').ids.fullName_input
             self.SignupEmail_input = self.root.get_screen('SignUpScreen').ids.email_input
             self.SignupFullName = self.SignupFullName_input.text
             self.SignupEmail = self.SignupEmail_input.text
             self.check_SignUpScreen()
-    
+
     def check_LogInScreen(self):
-        serch = findEmployeeInfoDB(self.LoginUsername)
-        if not self.LoginUsername or all(char in string.whitespace + string.punctuation for char in self.LoginUsername):
+        serch = authenticate(username = self.LoginUsername, password = self.LoginPassword)
+        if (len(self.LoginUsername) >= self.LoginUsername_input.max_text_length) or (len(self.LoginPassword) >= self.LoginPassword_input.max_text_length):
+            self.show_notification(True)
+
+        elif not self.LoginUsername or all(char in string.whitespace + string.punctuation for char in self.LoginUsername):
             self.show_notification(True)
         
         elif not self.LoginUsername:
@@ -126,39 +105,49 @@ class MainApp(MDApp):
         elif not self.LoginPassword:
             self.show_notification(True)
         
-        elif serch == None or not((serch[0] == self.LoginUsername) and verify_password(serch[2],self.LoginPassword)):
+        elif serch == False:
             self.show_notification(True)
 
         else:
             self.show_notification(False)
-            self.root.current = 'UserScreen'
         self.clear_input()
-
+    
     def check_ForgotScreen(self):
-        serch = findEmployeeInfoDB(self.forgotUsername)
-        if not self.forgotUsername  or all(char in string.whitespace + string.punctuation for char in self.forgotUsername):
+        serch = authenticate(username = self.forgotUsername, email = self.forgotEmail)
+        if (len(self.forgotUsername) >= self.forgotUsername_input.max_text_length) or (len(self.forgotEmail) >= self.forgotEmail_input.max_text_length):
+            self.show_notification(True)
+
+        elif not self.forgotUsername  or all(char in string.whitespace + string.punctuation for char in self.forgotUsername):
             self.show_notification(True)
         
         elif not self.forgotUsername:
             self.show_notification(True)
 
-        elif not self.forgotEmail:
+        elif not(self.forgotEmail):
             self.show_notification(True)
         
-        elif serch == None or not((serch[0] == self.forgotUsername) and (serch[1] == self.forgotEmail)):
+        elif not(is_valid_email(self.forgotEmail)):
             self.show_notification(True)
-            
+
+        elif serch == False:
+            self.show_notification(True)
+        
         else:
             self.show_notification(False)
-            self.root.current = 'UserScreen'
         self.clear_input()
-
+    
     def check_SignUpScreen(self):
-        serch = findEmployeeInfoDB(self.SignupFullName)
-        if not self.SignupFullName:
+        serch = authenticate(email = self.SignupEmail, full_name = self.SignupFullName)
+        if (len(self.SignupFullName) >= self.SignupFullName_input.max_text_length) or (len(self.SignupEmail) >= self.SignupEmail_input.max_text_length):
             self.show_notification(True)
 
-        elif not self.SignupEmail:
+        elif not self.SignupFullName:
+            self.show_notification(True)
+
+        elif not(self.SignupEmail):
+            self.show_notification(True)
+
+        elif not(is_valid_email(self.SignupEmail)):
             self.show_notification(True)
 
         elif serch:
@@ -166,10 +155,6 @@ class MainApp(MDApp):
             
         else:
             self.show_notification(False)
-            newUsername = self.SignupFullName
-            addEmployeeInfoDB(newUsername,self.SignupEmail,self.SignupFullName)
-            self.root.current = 'UserScreen'
-
         self.clear_input()
 
     def show_notification(self, check):
@@ -196,23 +181,7 @@ class MainApp(MDApp):
             self.SignupEmail_input.text = ''
         except AttributeError:
             pass
-    
-    # user Form -------------------
-    def file_manager_open(self):
-        self.file_manager.show('/')
-        
-    def exit_manager(self, *args):
-        self.file_manager.close()
-    
-    def select_path(self, path):
-        if os.path.isdir(path):
-            files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
-            image_files = [f for f in files if f.endswith(('.png', '.jpg', '.jpeg'))]
-            if image_files:
-                image_path = os.path.join(path, image_files[0])
-                self.root.ids.image_widget.source = image_path
 
-        self.exit_manager()
 
 if __name__ == '__main__':
     Window.size = (360, 640)
