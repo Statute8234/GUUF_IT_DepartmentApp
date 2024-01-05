@@ -2,7 +2,6 @@ WindowManager:
     LogInScreen:
     SignUpScreen:
     ForgotPasswordScreen:
-    UserScreen:
 
 <LogInScreen>:
     id: screen1
@@ -24,7 +23,7 @@ WindowManager:
         radius: [17, 17, 17, 17]
 
         Image:
-            source: 'Untitled1.jpg'
+            source: 'channels4_profile-fotor-bg-remover-20240104154756.png'
             size_hint: None, None
             size: 100, 100
             pos_hint: {"center_x": 0.5}
@@ -60,7 +59,7 @@ WindowManager:
                     hint_text: "Username"
                     icon_left: "account"
                     mode: "round"
-                    max_text_length: 150
+                    max_text_length: 30
                     width: 200
                     height: 50 
                     size_hint_x: None
@@ -86,7 +85,7 @@ WindowManager:
                     hint_text: "Password"
                     icon_right: "eye-off"
                     mode: "round"
-                    max_text_length: 150
+                    max_text_length: 30
                     width: 200
                     height: 50 
                     size_hint_x: None
@@ -203,7 +202,7 @@ WindowManager:
                     hint_text: "Full Name"
                     icon_left: "account"
                     mode: "round"
-                    max_text_length: 150
+                    max_text_length: 100
                     width: 200
                     height: 50 
                     size_hint_x: None
@@ -229,7 +228,7 @@ WindowManager:
                     hint_text: "Email"
                     icon_right: "email"
                     mode: "round"
-                    max_text_length: 150
+                    max_text_length: 320
                     width: 200
                     height: 50 
                     size_hint_x: None
@@ -251,7 +250,7 @@ WindowManager:
             md_bg_color: "gray"
             on_release: app.check_input()
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-        
+
 <ForgotPasswordScreen>
     id: screen3
     name: 'ForgotPasswordScreen'
@@ -325,7 +324,7 @@ WindowManager:
                     hint_text: "Username"
                     icon_left: "account"
                     mode: "round"
-                    max_text_length: 150
+                    max_text_length: 30
                     width: 200
                     height: 50 
                     size_hint_x: None
@@ -351,7 +350,7 @@ WindowManager:
                     hint_text: "Email"
                     icon_right: "email"
                     mode: "round"
-                    max_text_length: 150
+                    max_text_length: 320
                     width: 200
                     height: 50 
                     size_hint_x: None
@@ -373,108 +372,3 @@ WindowManager:
             md_bg_color: "gray"
             on_release: app.check_input()
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-<UserScreen>
-    id: screen4
-    name: 'UserScreen'
-    
-    MDTopAppBar:
-        title: "Navigation"
-        elevation: 5
-        pos_hint: {"top": 1}
-        md_bg_color: "white"
-        specific_text_color: "black"
-        left_action_items:
-            [['menu', lambda x: nav_drawer.set_state("open")]]
-        
-    MDNavigationDrawer:
-        id: nav_drawer
-        md_bg_color: "white"
-        radius: (0, 16, 16, 0)
-
-        MDNavigationDrawerMenu:
-
-            MDNavigationDrawerHeader:
-                text: "Navigation"
-                theme_text_color: "Custom"
-                text_color: 0, 0, 0, 1
-            
-            MDNavigationDrawerDivider:
-
-            MDNavigationDrawerLabel:
-                text: "Manual"
-            
-            MDNavigationDrawerItem:
-                icon: "desktop-classic"
-                text: "AnyDesk Manual"
-                md_bg_color: 0.5, 0.5, 0.5, 1
-
-            MDNavigationDrawerItem:
-                icon: "file-document-outline"
-                text: "Blackmagic ATEM SDI Switcher Manual"
-                md_bg_color: 0.5, 0.5, 0.5, 1
-            
-            MDNavigationDrawerItem:
-                icon: "file-document-outline"
-                text: "Blackmagic ATEM Software Control Manual"
-                md_bg_color: 0.5, 0.5, 0.5, 1
-            
-            MDNavigationDrawerItem:
-                icon: "microsoft-excel"
-                text: "Microsoft Excel Manual"
-                md_bg_color: 0.5, 0.5, 0.5, 1
-            
-            MDNavigationDrawerItem:
-                icon: "presentation"
-                text: "PowerPoint Manual"
-                md_bg_color: 0.5, 0.5, 0.5, 1
-            
-            MDNavigationDrawerItem:
-                icon: "television"
-                text: "XSplit Manual"
-                md_bg_color: 0.5, 0.5, 0.5, 1
-
-            MDNavigationDrawerItem:
-                icon: "youtube"
-                text: "YouTube Manual"
-                md_bg_color: 0.5, 0.5, 0.5, 1
-
-            MDNavigationDrawerDivider:
-
-            MDNavigationDrawerLabel:
-                text: "Tools"
-            
-            MDNavigationDrawerItem:
-                icon: "calendar"
-                text: "Calendar"
-                md_bg_color: 0.5, 0.5, 0.5, 1
-            
-            MDNavigationDrawerItem:
-                icon: "message"
-                text: "Messaging softwere"
-                md_bg_color: 0.5, 0.5, 0.5, 1
-            
-            MDNavigationDrawerItem:
-                icon: "microphone"
-                text: "Microphone Data Sheet"
-                md_bg_color: 0.5, 0.5, 0.5, 1
-
-            MDNavigationDrawerItem:
-                icon: "microphone"
-                text: "Microphone Input List"
-                md_bg_color: 0.5, 0.5, 0.5, 1
-
-            MDNavigationDrawerItem:
-                icon: "script-text"
-                text: "Script Maker"
-                md_bg_color: 0.5, 0.5, 0.5, 1
-        
-            MDNavigationDrawerDivider:
-            
-            MDNavigationDrawerLabel:
-                text: "Account"
-            
-            MDNavigationDrawerItem:
-                icon: "account"
-                text: "Profile"
-                md_bg_color: 0.5, 0.5, 0.5, 1
