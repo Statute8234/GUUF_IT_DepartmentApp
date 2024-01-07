@@ -11,7 +11,7 @@ WindowManager:
         source: 'uua_rainbow_logo.jpg'
         allow_stretch: True
         keep_ratio: False
-        
+    
     MDCard:
         size_hint: None, None
         size: 360, 640
@@ -30,8 +30,8 @@ WindowManager:
 
         MDLabel:
             id: welcome_label
-            text: "GUUF IT Department"
-            font_size: 30
+            text: "GUUF IT Department App"
+            font_size: 25
             halign: 'center'
             size_hint_y: None
             height: self.texture_size[1]
@@ -39,7 +39,7 @@ WindowManager:
 
         BoxLayout:
             orientation: 'vertical'
-            spacing: 40
+            spacing: 20
 
             BoxLayout:
                 orientation: 'horizontal'
@@ -64,7 +64,7 @@ WindowManager:
                     height: 50 
                     size_hint_x: None
                     size_hint_y: None
-                    padding_y: 150
+                    padding_y: 10
                     write_tab: False
 
             BoxLayout:
@@ -90,7 +90,7 @@ WindowManager:
                     height: 50 
                     size_hint_x: None
                     size_hint_y: None
-                    padding_y: 15
+                    padding_y: 10
                     password: True
                     on_text:  self.text = self.text.replace(" ", "")
                     write_tab: False
@@ -107,18 +107,18 @@ WindowManager:
             on_press: app.root.current = 'ForgotPasswordScreen'
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
-        MDRaisedButton:
+        MDRoundFlatButton:
             id: signUp_button
             text: "Sign Up"
             size_hint_y: None
             padding_y: 15
             size_hint_x: 1
             radius: [19, 19, 19, 19]
-            md_bg_color: "gray"
+            line_color: "gray"
             on_press: app.root.current = 'SignUpScreen'
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         
-        MDRaisedButton:
+        MDRoundFlatIconButton:
             id: submit_button
             text: "Submit"
             size_hint_y: None
@@ -126,7 +126,9 @@ WindowManager:
             size_hint_x: 1
             radius: [19, 19, 19, 19]
             md_bg_color: "gray"
-            on_release: app.check_input()
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 1
+            on_release: root.check_input()
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
 <SignUpScreen>
@@ -178,11 +180,11 @@ WindowManager:
         
         Widget:
             size_hint_y: None
-            height: 20
+            height: 70
 
         BoxLayout:
             orientation: 'vertical'
-            spacing: 70
+            spacing: 90
 
             BoxLayout:
                 orientation: 'horizontal'
@@ -207,7 +209,7 @@ WindowManager:
                     height: 50 
                     size_hint_x: None
                     size_hint_y: None
-                    padding_y: 150
+                    padding_y: 15
                     write_tab: False
             
             BoxLayout:
@@ -233,22 +235,24 @@ WindowManager:
                     height: 50 
                     size_hint_x: None
                     size_hint_y: None
-                    padding_y: 150
+                    padding_y: 15
                     write_tab: False
 
         Widget:
             size_hint_y: None
             height: 90
 
-        MDRaisedButton:
-            id: signUp_button
-            text: "Sign Up"
+        MDRoundFlatIconButton:
+            id: submit_button
+            text: "Submit"
             size_hint_y: None
             padding_y: 15
             size_hint_x: 1
             radius: [19, 19, 19, 19]
             md_bg_color: "gray"
-            on_release: app.check_input()
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 1
+            on_release: root.check_input()
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
 <ForgotPasswordScreen>
