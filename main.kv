@@ -304,11 +304,11 @@ WindowManager:
         
         Widget:
             size_hint_y: None
-            height: 20
+            height: 70
 
         BoxLayout:
             orientation: 'vertical'
-            spacing: 70
+            spacing: 90
 
             BoxLayout:
                 orientation: 'horizontal'
@@ -374,5 +374,5 @@ WindowManager:
             size_hint_x: 1
             radius: [19, 19, 19, 19]
             md_bg_color: "gray"
-            on_release: app.check_input()
+            on_release: root.check_input()
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
