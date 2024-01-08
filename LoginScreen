@@ -1,0 +1,238 @@
+import string
+from kivy.lang import Builder
+from kivymd.app import MDApp
+from kivy.core.window import Window
+from kivy.uix.screenmanager import ScreenManager, Screen, RiseInTransition
+from kivy.utils import platform
+from kivy.logger import Logger
+from kivymd.toast import toast
+# ----------------------
+from email.message import EmailMessage
+from pymongo import MongoClient
+import bcrypt, secrets
+import ssl, smtplib
+import re
+
+# pymongo database
+client = MongoClient("mongodb://localhost:27017/")
+db = client.neuraldb
+users = db.users
+#users.delete_many({})
+
+# bcrypt
+def generate_random_username(length=8):
+    return ''.join(secrets.choice(string.ascii_letters) for _ in range(length))
+
+def generate_random_password(length=12):
+    password_characters = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(secrets.choice(password_characters) for _ in range(length))
+
+def hash_password(password):
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed_password
+
+def verify_password(password, hashed_password):
+    try:
+        return bcrypt.checkpw(password.encode('utf-8'), hashed_password)
+    except:
+        return password == hashed_password
+
+# DB options
+def AddPerson(Username, email, full_name):
+     password = "Password123"
+     person_data = {"Username":Username,'Email':email,'Full Name':full_name,'Password':password}
+     push = users.insert_one(person_data)
+#AddPerson("admin","admin_email@gmail.com","admin admin")
+
+def RemovePerson(Username, full_name):
+    person = {'Username': Username, "full_name": full_name}
+    remove = users.delete_many(person)
+
+def FindPerson(input_value, search_key='Username'):
+    query = {search_key: input_value}
+    person = users.find_one(query)
+    if person:
+        return person
+    else:
+        return False
+
+def FindItem(input_value, find_item, search_key='Username'):
+    query = {search_key: input_value}
+    item = users.find_one(query)
+    if item:
+        return item
+    else:
+        if search_key == input_value:
+            return FindPerson(input_value, search_key=find_item)
+        else:
+            return False
+        
+def EditPerson(Username, full_name, edit_info_name, new_info):
+    query = {'Username': Username, "Full Name": full_name}
+    update_result = users.update_many(query, {'$set': {edit_info_name: new_info}})
+        
+def PrintDataBase():
+    cursor = users.find()
+    for user in cursor:
+        print(user)
+
+# check email
+def is_valid_email(email):
+    pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    return re.match(pattern, email) is not None
+
+# send email 
+def SenderInfo(email_receiver, subject, body):
+    email_sender = "illindependent867@gmail.com"
+    email_password = "hmpa zbyh eclf dirz"
+    email_receiver = email_receiver
+
+    email = EmailMessage()
+    email["From"] = email_sender
+    email["To"] = email_receiver
+    email["Subject"] = subject
+    email.set_content(body)
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context = context) as smtp:
+        smtp.login(email_sender, email_password)
+        smtp.sendmail(email_sender, email_receiver, email.as_string())
+
+# windows
+class WindowManager(ScreenManager):
+    pass
+
+class LogInScreen(Screen):
+    def check_input(self):
+        PrintDataBase()
+        self.LoginUsername_input = self.ids.username_input
+        self.LoginPassword_input = self.ids.Password_input
+        self.LoginUsername = self.LoginUsername_input.text
+        self.LoginPassword = self.LoginPassword_input.text
+
+        if (len(self.LoginUsername) >= self.LoginUsername_input.max_text_length):
+            self.show_notification(True)
+        
+        elif not self.LoginUsername or all(char in string.whitespace + string.punctuation for char in self.LoginUsername):
+            self.show_notification(True)
+
+        elif not self.LoginUsername:
+            self.show_notification(True)
+        
+        elif not self.LoginPassword:
+            self.show_notification(True)
+        
+        elif FindPerson(input_value = self.LoginUsername, search_key = 'Username') == False:
+            self.show_notification(True)
+
+        else:
+            print(FindItem(input_value = self.LoginUsername, find_item = "Password", search_key="Username"))
+            self.show_notification(False)
+
+        self.clear()
+
+    def clear(self):
+        self.LoginUsername_input.text = ""
+        self.LoginPassword_input.text = ""
+
+    def show_notification(self, check):
+        if (check):
+            toast('Sorry, Somthing has gone wrong')
+        else:
+            toast('Success')
+
+class SignUpScreen(Screen):
+    def check_input(self):
+        self.SignupFullName_input = self.ids.fullName_input
+        self.SignupEmail_input = self.ids.email_input
+        self.SignupFullName = self.SignupFullName_input.text
+        self.SignupEmail = self.SignupEmail_input.text
+
+        if (len(self.SignupFullName) >= self.SignupFullName_input.max_text_length) or (len(self.SignupEmail) >= self.SignupEmail_input.max_text_length):
+            self.show_notification(True)
+        
+        elif not self.SignupFullName:
+            self.show_notification(True)
+
+        elif not(self.SignupEmail):
+            self.show_notification(True)
+
+        elif not(is_valid_email(self.SignupEmail)):
+            self.show_notification(True)
+
+        elif FindPerson(input_value = self.SignupFullName, search_key = 'Full Name') != False:
+            self.show_notification(True)
+
+        elif FindPerson(input_value = self.SignupEmail, search_key = 'Email') != False:
+            self.show_notification(True)
+            
+        else:
+            self.show_notification(False)
+        self.clear()
+
+    def clear(self):
+        self.SignupFullName_input.text = ""
+        self.SignupEmail_input.text = ""
+
+    def show_notification(self, check):
+        if (check):
+            toast('Sorry, Somthing has gone wrong')
+        else:
+            toast('Success')
+
+class ForgotPasswordScreen(Screen):
+    def check_input(self):
+        self.forgotUsername_input = self.ids.username_input
+        self.forgotEmail_input = self.ids.email_label
+        self.forgotUsername = self.ids.username_input.text
+        self.forgotEmail = self.ids.email_input.text
+
+        if len(self.forgotUsername) >= self.ids.username_input.max_text_length or len(self.forgotEmail) >= self.ids.email_input.max_text_length:
+            self.show_notification(True)
+        
+        elif not self.forgotUsername:
+            self.show_notification(True)
+
+        elif not self.forgotEmail:
+            self.show_notification(True)
+
+        elif not is_valid_email(self.forgotEmail):
+            self.show_notification(True)
+
+        elif FindPerson(input_value=self.forgotUsername, search_key='Username') == False:
+            self.show_notification(True)
+
+        elif FindPerson(input_value=self.forgotEmail, search_key='Email') == False:
+            self.show_notification(True)
+            
+        else:
+            self.show_notification(False)
+        self.clear()
+
+    def clear(self):
+        self.forgotUsername_input.text = ""
+        self.forgotEmail_input.text = ""
+
+    def show_notification(self, check):
+        if (check):
+            toast('Sorry, Somthing has gone wrong')
+        else:
+            toast('Success')
+
+# app
+class MainApp(MDApp):
+    def build(self):
+        self.theme_cls.theme_style = "Light"
+        self.theme_cls.primary_palette = "BlueGray"
+        self.WM = WindowManager()
+        self.WM.add_widget(LogInScreen(name='LogInScreen'))
+        return Builder.load_file('main.kv')
+    
+    def on_start(self):
+        self.icon = "client\channels4_profile-fotor-bg-remover-20240104154756.png"
+        self.title = "GUUF IT Department App"
+    
+
+if __name__ == '__main__':
+    Window.size = (360, 640)
+    MainApp().run()
