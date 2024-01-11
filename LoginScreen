@@ -1,23 +1,51 @@
-import string
 from kivy.lang import Builder
 from kivymd.app import MDApp
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, Screen, RiseInTransition
-from kivy.utils import platform
-from kivy.logger import Logger
+from kivy.properties import StringProperty
+from kivymd.uix.relativelayout import MDRelativeLayout
+from kivy.uix.boxlayout import BoxLayout
 from kivymd.toast import toast
 # ----------------------
+import platform
+from geopy.geocoders import Nominatim
+from datetime import datetime
 from email.message import EmailMessage
 from pymongo import MongoClient
 import bcrypt, secrets
 import ssl, smtplib
-import re
+import string
+import re, random, sys
 
-# pymongo database
-client = MongoClient("mongodb://localhost:27017/")
-db = client.neuraldb
-users = db.users
-#users.delete_many({})
+# Using Nominatim from geopy to get location based on IP address
+def DeviceLocation():
+    geolocator = Nominatim(user_agent="device_location_app")
+    location = geolocator.geocode('')
+    
+    if location:
+        return {
+            'latitude': location.latitude,
+            'longitude': location.longitude,
+            'address': location.address
+        }
+    else:
+        return None
+
+# Using datetime to get the current time
+def CurrentTime():
+    current_time = datetime.now()
+    return current_time.strftime('%Y-%m-%d %H:%M:%S')
+
+# get_device_info
+def DeviceInfo():
+    return {
+        "System": platform.system(),
+        "Node": platform.node(),
+        "Release": platform.release(),
+        "Version": platform.version(),
+        "Machine": platform.machine(),
+        "Processor": platform.processor()
+    }
 
 # bcrypt
 def generate_random_username(length=8):
@@ -38,44 +66,35 @@ def verify_password(password, hashed_password):
     except:
         return password == hashed_password
 
-# DB options
-def AddPerson(Username, email, full_name):
-     password = "Password123"
-     person_data = {"Username":Username,'Email':email,'Full Name':full_name,'Password':password}
-     push = users.insert_one(person_data)
-#AddPerson("admin","admin_email@gmail.com","admin admin")
+# pymongo database
+client = MongoClient("mongodb://localhost:27017/")
+db = client.neuraldb
+users = db.users
+users.delete_many({})
 
-def RemovePerson(Username, full_name):
-    person = {'Username': Username, "full_name": full_name}
-    remove = users.delete_many(person)
+# db options
+def AddUser(Username, Email, Full_Name):
+    password = generate_random_username()
+    user_data = {'Username': Username, 'Email': Email, 'Full Name': Full_Name, 'Password': password}
+    users.insert_one(user_data)
+AddUser("admin", "illindependent867@gmail.com", "admin user")
 
-def FindPerson(input_value, search_key='Username'):
+def FindUser(input_value, search_key='Username'):
     query = {search_key: input_value}
     person = users.find_one(query)
-    if person:
-        return person
-    else:
-        return False
+    return person
 
-def FindItem(input_value, find_item, search_key='Username'):
-    query = {search_key: input_value}
-    item = users.find_one(query)
-    if item:
-        return item
-    else:
-        if search_key == input_value:
-            return FindPerson(input_value, search_key=find_item)
-        else:
-            return False
-        
-def EditPerson(Username, full_name, edit_info_name, new_info):
-    query = {'Username': Username, "Full Name": full_name}
-    update_result = users.update_many(query, {'$set': {edit_info_name: new_info}})
-        
 def PrintDataBase():
     cursor = users.find()
     for user in cursor:
         print(user)
+
+# show notification
+def show_notification(check):
+    if (check):
+        toast('Sorry, Somthing has gone wrong')
+    else:
+        toast('Success')
 
 # check email
 def is_valid_email(email):
@@ -104,122 +123,145 @@ class WindowManager(ScreenManager):
 
 class LogInScreen(Screen):
     def check_input(self):
-        PrintDataBase()
         self.LoginUsername_input = self.ids.username_input
-        self.LoginPassword_input = self.ids.Password_input
+        self.LoginPassword_input = self.ids.text_field
         self.LoginUsername = self.LoginUsername_input.text
         self.LoginPassword = self.LoginPassword_input.text
 
-        if (len(self.LoginUsername) >= self.LoginUsername_input.max_text_length):
-            self.show_notification(True)
-        
-        elif not self.LoginUsername or all(char in string.whitespace + string.punctuation for char in self.LoginUsername):
-            self.show_notification(True)
+        if (len(self.LoginUsername) >= self.LoginUsername_input.max_text_length) or (len(self.LoginPassword) >= self.LoginPassword_input.max_text_length):
+            show_notification(True)
 
-        elif not self.LoginUsername:
-            self.show_notification(True)
+        elif (bool(re.search(r"\s", self.LoginUsername))):
+            show_notification(True)
         
-        elif not self.LoginPassword:
-            self.show_notification(True)
+        elif not self.LoginUsername or not self.LoginPassword:
+            show_notification(True)
         
-        elif FindPerson(input_value = self.LoginUsername, search_key = 'Username') == False:
-            self.show_notification(True)
-
+        elif any(char in string.punctuation for char in self.LoginUsername):
+            show_notification(True)
+        
+        user = FindUser(input_value=self.LoginUsername, search_key='Username')
+        if user and verify_password(self.LoginPassword, user.get('Password', '')):
+            show_notification(False)
+            location = DeviceLocation()
+            current_time = CurrentTime()
+            device_info = DeviceInfo()
+            configBody = f"""Dear {user.get('Username', '')},
+                        \n\t We are writing to inform you about recent login activity on your account. Details of the Login:
+                        \n Date and Time: {location}
+                        \n Location: {current_time}
+                        \n Device: {device_info[1]}, {device_info[0]}
+                        \n
+                        \n\t If you recognize this activity, you can disregard this email. However, if you do not recognize this login or suspect unauthorized access to your account, please take the following steps immediately:
+                        \n\t 1) Change your password: Visit the app and go to the login page. Click on the "Forgot Password" link to reset your password. Choose a strong, unique password that you have not used elsewhere.
+                        \n\t 2) Review Account Activity: Check your account settings for any unfamiliar changes. Ensure that your contact information, especially your email address, is up-to-date.
+                        \n\t 3) Enable Two-Factor Authentication (2FA): If you haven't already, consider enabling 2FA for an extra layer of security. This can usually be done in your account settings.
+                        \n\t 4) Contact Support: If you continue to have concerns or need assistance, please contact our support team
+                        \n\t Remember to be cautious of phishing attempts and only use official channels for communication regarding your account. We take the security of your account seriously and are here to help ensure your information remains safe.
+                        \n\t Thank you for your attention to this matter.
+                        \n\t Best regards,
+                        """
+            SenderInfo(email_receiver=user.get('Email', ''), subject="Login Detected", body=configBody)
         else:
-            print(FindItem(input_value = self.LoginUsername, find_item = "Password", search_key="Username"))
-            self.show_notification(False)
-
+            show_notification(True)
+        PrintDataBase()
         self.clear()
-
+    
     def clear(self):
         self.LoginUsername_input.text = ""
         self.LoginPassword_input.text = ""
 
-    def show_notification(self, check):
-        if (check):
-            toast('Sorry, Somthing has gone wrong')
-        else:
-            toast('Success')
-
 class SignUpScreen(Screen):
     def check_input(self):
-        self.SignupFullName_input = self.ids.fullName_input
-        self.SignupEmail_input = self.ids.email_input
-        self.SignupFullName = self.SignupFullName_input.text
-        self.SignupEmail = self.SignupEmail_input.text
-
-        if (len(self.SignupFullName) >= self.SignupFullName_input.max_text_length) or (len(self.SignupEmail) >= self.SignupEmail_input.max_text_length):
-            self.show_notification(True)
+        self.SignUpFullName_input = self.ids.fullName_input
+        self.SignUpEmail_input = self.ids.email_input
+        self.SignUpFullName = self.SignUpFullName_input.text
+        self.SignUpEmail = self.SignUpEmail_input.text
         
-        elif not self.SignupFullName:
-            self.show_notification(True)
-
-        elif not(self.SignupEmail):
-            self.show_notification(True)
-
-        elif not(is_valid_email(self.SignupEmail)):
-            self.show_notification(True)
-
-        elif FindPerson(input_value = self.SignupFullName, search_key = 'Full Name') != False:
-            self.show_notification(True)
-
-        elif FindPerson(input_value = self.SignupEmail, search_key = 'Email') != False:
-            self.show_notification(True)
-            
+        if (len(self.SignUpFullName) >= self.SignUpFullName_input.max_text_length) or (len(self.SignUpEmail) >= self.SignUpEmail_input.max_text_length):
+            show_notification(True)
+        
+        elif any(char in string.punctuation for char in self.SignUpFullName):
+            show_notification(True)
+        
+        elif not self.SignUpFullName or not self.SignUpEmail or not is_valid_email(self.SignUpEmail):
+            show_notification(True)
+        
+        elif any(char in string.punctuation for char in self.SignUpFullName):
+            show_notification(True)
+        
+        elif FindUser(input_value=self.SignUpFullName, search_key='Full Name'):
+            show_notification(True)
+        
+        elif FindUser(input_value=self.SignUpEmail, search_key='Email'):
+            show_notification(True)
+        
         else:
-            self.show_notification(False)
+            show_notification(False)
+            username = generate_random_username()
+            AddUser(username,self.SignUpEmail,self.SignUpFullName)
+            user = FindUser(input_value=self.SignUpFullName, search_key='Full Name')
+            configBody = f"""
+                        Dear {user.get('Full Name', '')},
+                        \n\t Welcome to Greenville Unitarian universalist fellowship or (GUUF). We wanted to send you an email to officially welcome you to the GUUF IT department, and it associated application.
+                        \n\t What you will have the ability to axis on this app: 
+                        \n - Calender
+                        \n - script maker
+                        \n - Messaging softwere
+                        \n - Password manager
+                        \n - Manuls
+                        \n\t welcome to the GUUF IT department
+                        \t Security:
+                        \n\t If you recognize this activity, you can disregard this email. However, if you do not recognize this login or suspect unauthorized access to your account, please take the following steps immediately:
+                        \n\t 1) Change your password: Visit the app and go to the login page. Click on the "Forgot Password" link to reset your password. Choose a strong, unique password that you have not used elsewhere.
+                        \n\t 2) Review Account Activity: Check your account settings for any unfamiliar changes. Ensure that your contact information, especially your email address, is up-to-date.
+                        \n\t 3) Enable Two-Factor Authentication (2FA): If you haven't already, consider enabling 2FA for an extra layer of security. This can usually be done in your account settings.
+                        \n\t 4) Contact Support: If you continue to have concerns or need assistance, please contact our support team
+                        \n\t Remember to be cautious of phishing attempts and only use official channels for communication regarding your account. We take the security of your account seriously and are here to help ensure your information remains safe.
+                        \n\t Thank you for your attention to this matter.
+                        \n\t Best regards,
+                        """
+            SenderInfo(email_receiver=user.get('Email', ''), subject="Login Detected", body=configBody)
         self.clear()
 
     def clear(self):
-        self.SignupFullName_input.text = ""
-        self.SignupEmail_input.text = ""
-
-    def show_notification(self, check):
-        if (check):
-            toast('Sorry, Somthing has gone wrong')
-        else:
-            toast('Success')
+        self.SignUpFullName_input.text = ""
+        self.SignUpEmail_input.text = ""
 
 class ForgotPasswordScreen(Screen):
     def check_input(self):
         self.forgotUsername_input = self.ids.username_input
-        self.forgotEmail_input = self.ids.email_label
-        self.forgotUsername = self.ids.username_input.text
-        self.forgotEmail = self.ids.email_input.text
+        self.forgotEmail_input = self.ids.email_input
+        self.forgotUsername = self.forgotUsername_input.text
+        self.forgotEmail = self.forgotEmail_input.text
+        self.code = random.randint(0, sys.maxsize)
+        self.changeWelcome_label = self.ids.welcome_label.text = f"Forgot Password {self.code}"
 
-        if len(self.forgotUsername) >= self.ids.username_input.max_text_length or len(self.forgotEmail) >= self.ids.email_input.max_text_length:
-            self.show_notification(True)
+        if (len(self.forgotUsername) >= self.forgotUsername_input.max_text_length) or (len(self.forgotEmail) >= self.forgotEmail_input.max_text_length):
+            show_notification(True)
+
+        elif (bool(re.search(r"\s", self.forgotUsername))):
+            show_notification(True)
         
-        elif not self.forgotUsername:
-            self.show_notification(True)
-
-        elif not self.forgotEmail:
-            self.show_notification(True)
-
-        elif not is_valid_email(self.forgotEmail):
-            self.show_notification(True)
-
-        elif FindPerson(input_value=self.forgotUsername, search_key='Username') == False:
-            self.show_notification(True)
-
-        elif FindPerson(input_value=self.forgotEmail, search_key='Email') == False:
-            self.show_notification(True)
-            
+        elif not self.forgotUsername or not self.forgotEmail:
+            show_notification(True)
+        
+        elif any(char in string.punctuation for char in self.forgotUsername):
+            show_notification(True)
+        
+        user = FindUser(input_value=self.forgotUsername, search_key='Username')
+        if user and self.forgotEmail == user.get('Email', ''):
+            show_notification(False)
         else:
-            self.show_notification(False)
-        self.clear()
+            show_notification(True)
 
     def clear(self):
-        self.forgotUsername_input.text = ""
-        self.forgotEmail_input.text = ""
+        self.SignUpFullName_input.text = ""
+        self.SignUpEmail_input.text = ""
 
-    def show_notification(self, check):
-        if (check):
-            toast('Sorry, Somthing has gone wrong')
-        else:
-            toast('Success')
+class EnterCodeScreen(Screen):
+    pass
 
-# app
 class MainApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Light"
@@ -227,11 +269,18 @@ class MainApp(MDApp):
         self.WM = WindowManager()
         self.WM.add_widget(LogInScreen(name='LogInScreen'))
         return Builder.load_file('main.kv')
-    
+
     def on_start(self):
         self.icon = "client\channels4_profile-fotor-bg-remover-20240104154756.png"
         self.title = "GUUF IT Department App"
     
+    def show_hide_password(self, instance):
+        if instance.password:
+            instance.password = False
+            instance.icon_right = "eye"
+        else:
+            instance.password = True
+            instance.icon_right = "eye-off"
 
 if __name__ == '__main__':
     Window.size = (360, 640)
