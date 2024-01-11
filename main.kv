@@ -1,7 +1,9 @@
 WindowManager:
+    
     LogInScreen:
     SignUpScreen:
     ForgotPasswordScreen:
+    EnterCodeScreen:
 
 <LogInScreen>:
     id: screen1
@@ -61,7 +63,7 @@ WindowManager:
                     mode: "round"
                     max_text_length: 30
                     width: 200
-                    height: 50 
+                    height: 50
                     size_hint_x: None
                     size_hint_y: None
                     padding_y: 10
@@ -69,7 +71,6 @@ WindowManager:
 
             BoxLayout:
                 orientation: 'horizontal'
-                spacing: 10
 
                 MDLabel:
                     id: password_label
@@ -79,21 +80,30 @@ WindowManager:
                     size_hint_y: None
                     height: self.texture_size[1]
                     padding_y: 15
-
+                    size_hint_x: None
+                    width: 110
+                    
                 MDTextField:
-                    id: Password_input
+                    id: text_field
                     hint_text: "Password"
-                    icon_right: "eye-off"
+                    icon_left: "key"
                     mode: "round"
                     max_text_length: 30
-                    width: 200
-                    height: 50 
+                    width: 160
+                    height: 50
                     size_hint_x: None
                     size_hint_y: None
-                    padding_y: 10
                     password: True
-                    on_text:  self.text = self.text.replace(" ", "")
+                    on_text: self.text = self.text.replace(" ", "")
                     write_tab: False
+                
+                MDIconButton:
+                    icon: "eye-off"
+                    theme_text_color: "Hint"
+
+                    on_release:
+                        self.icon = "eye" if self.icon == "eye-off" else "eye-off"
+                        text_field.password = False if text_field.password is True else True
         
         Widget:
             size_hint_y: None
@@ -376,3 +386,35 @@ WindowManager:
             md_bg_color: "gray"
             on_release: root.check_input()
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+<EnterCodeScreen>
+    id: screen4
+    name: 'EnterCodeScreen'
+
+    Image:
+        source: 'uua_rainbow_logo.jpg'
+        allow_stretch: True
+        keep_ratio: False
+    
+    MDCard:
+        size_hint: None, None
+        size: 360, 640
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        elevation: 5
+        padding: 25
+        spacing: 25
+        orientation: 'vertical'
+        radius: [17, 17, 17, 17]
+
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: 10
+
+            MDRaisedButton:
+                id: back_button
+                text: "Back"
+                size_hint_y: None
+                padding_y: 15
+                md_bg_color: "red"
+                text_color: "black"
+                on_press: app.root.current = 'LogInScreen'
