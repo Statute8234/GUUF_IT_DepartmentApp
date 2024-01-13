@@ -70,19 +70,21 @@ def verify_password(password, hashed_password):
 client = MongoClient("mongodb://localhost:27017/")
 db = client.neuraldb
 users = db.users
-users.delete_many({})
 
 # db options
 def AddUser(Username, Email, Full_Name):
     password = generate_random_username()
     user_data = {'Username': Username, 'Email': Email, 'Full Name': Full_Name, 'Password': password}
     users.insert_one(user_data)
-AddUser("admin", "illindependent867@gmail.com", "admin user")
 
 def FindUser(input_value, search_key='Username'):
     query = {search_key: input_value}
     person = users.find_one(query)
     return person
+
+def EditPerson(Username, full_name, edit_info_name, new_info):
+    query = {'Username': Username, "Full Name": full_name}
+    update_result = users.update_many(query, {'$set': {edit_info_name: new_info}})
 
 def PrintDataBase():
     cursor = users.find()
@@ -221,21 +223,21 @@ class SignUpScreen(Screen):
                         \n\t Thank you for your attention to this matter.
                         \n\t Best regards,
                         """
-            SenderInfo(email_receiver=user.get('Email', ''), subject="Login Detected", body=configBody)
+            SenderInfo(email_receiver=user.get('Email', ''), subject="Signup Detected", body=configBody)
         self.clear()
 
     def clear(self):
         self.SignUpFullName_input.text = ""
         self.SignUpEmail_input.text = ""
 
+code = random.randint(1000,9000)
 class ForgotPasswordScreen(Screen):
     def check_input(self):
         self.forgotUsername_input = self.ids.username_input
         self.forgotEmail_input = self.ids.email_input
         self.forgotUsername = self.forgotUsername_input.text
         self.forgotEmail = self.forgotEmail_input.text
-        self.code = random.randint(0, sys.maxsize)
-        self.changeWelcome_label = self.ids.welcome_label.text = f"Forgot Password {self.code}"
+        self.code = code
 
         if (len(self.forgotUsername) >= self.forgotUsername_input.max_text_length) or (len(self.forgotEmail) >= self.forgotEmail_input.max_text_length):
             show_notification(True)
@@ -252,6 +254,22 @@ class ForgotPasswordScreen(Screen):
         user = FindUser(input_value=self.forgotUsername, search_key='Username')
         if user and self.forgotEmail == user.get('Email', ''):
             show_notification(False)
+            configBody = f"""Dear {user.get('Username', '')},
+                        \n\t On the behalf of the Greenville Unitarian universalist fellowship or (GUUF) the application called GUUF IT DepartmentApp would like to inform you that you may have forgotten your password.
+                        \n\t If you do not reconise this email, place name, or application name. Please feel free to block or remove this email. 
+                        \n\t If you keep on geeting messages and do not reconise any information on this email, please: 
+                        \n\t 1) Review Account Activity
+                        \n\t 2) Change your password and email
+                        \n\t 3) black and report (if needed)
+                        \n\t 4) unsubscribe
+                        \n\t please use this code to change your password: {self.code},
+                        \n\t Remember to be cautious of phishing attempts and only use official channels for communication regarding your account. We take the security of your account seriously and are here to help ensure your information remains safe.
+                        \n\t Thank you for your attention to this matter.
+                        \n\t Best regards,
+                        """
+            SenderInfo(email_receiver=user.get('Email', ''), subject="Forgot Password Detected", body=configBody)
+            app = MDApp.get_running_app()
+            app.root.current = 'EnterCodeScreen'
         else:
             show_notification(True)
 
@@ -260,7 +278,47 @@ class ForgotPasswordScreen(Screen):
         self.SignUpEmail_input.text = ""
 
 class EnterCodeScreen(Screen):
-    pass
+    def check_input(self):
+        self.newPasswordText_field = self.ids.text_field
+        self.code_input = self.ids.code_input
+        self.newPassword = self.newPasswordText_field.text
+        self.codeInput = self.code_input.text
+
+        if (len(self.newPassword) >= self.newPasswordText_field.max_text_length) or (len(self.codeInput) > self.code_input.max_text_length):
+            show_notification(True)
+        
+        elif not self.newPassword or not self.codeInput:
+            show_notification(True)
+        
+        elif int(self.codeInput) != code:
+            show_notification(True)
+        
+        elif FindUser(input_value = self.newPassword, search_key = 'Password'):
+            show_notification(True)
+
+        else:
+            show_notification(False)
+            EditPerson()
+            location = DeviceLocation()
+            current_time = CurrentTime()
+            device_info = DeviceInfo()
+            user = FindUser(input_value=self.LoginUsername, search_key='Username')
+            configBody = f"""Dear {user.get('Username', '')},
+                        \n\t We are writing to inform you about recent login activity on your account. Details of the Login:
+                        \n Date and Time: {location}
+                        \n Location: {current_time}
+                        \n Device: {device_info[1]}, {device_info[0]}
+                        \n
+                        \n\t If you recognize this activity, you can disregard this email. However, if you do not recognize this login or suspect unauthorized access to your account, please take the following steps immediately:
+                        \n\t 1) Change your password: Visit the app and go to the login page. Click on the "Forgot Password" link to reset your password. Choose a strong, unique password that you have not used elsewhere.
+                        \n\t 2) Review Account Activity: Check your account settings for any unfamiliar changes. Ensure that your contact information, especially your email address, is up-to-date.
+                        \n\t 3) Enable Two-Factor Authentication (2FA): If you haven't already, consider enabling 2FA for an extra layer of security. This can usually be done in your account settings.
+                        \n\t 4) Contact Support: If you continue to have concerns or need assistance, please contact our support team
+                        \n\t Remember to be cautious of phishing attempts and only use official channels for communication regarding your account. We take the security of your account seriously and are here to help ensure your information remains safe.
+                        \n\t Thank you for your attention to this matter.
+                        \n\t Best regards,
+                        """
+            SenderInfo(email_receiver=user.get('Email', ''), subject="Login Detected", body=configBody)
 
 class MainApp(MDApp):
     def build(self):
@@ -271,7 +329,7 @@ class MainApp(MDApp):
         return Builder.load_file('main.kv')
 
     def on_start(self):
-        self.icon = "client\channels4_profile-fotor-bg-remover-20240104154756.png"
+        self.icon = "assets\channels4_profile-fotor-bg-remover-20240104154756.png"
         self.title = "GUUF IT Department App"
     
     def show_hide_password(self, instance):
