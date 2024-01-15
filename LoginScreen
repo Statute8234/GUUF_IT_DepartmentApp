@@ -230,15 +230,25 @@ class SignUpScreen(Screen):
         self.SignUpFullName_input.text = ""
         self.SignUpEmail_input.text = ""
 
-code = random.randint(1000,9000)
 class ForgotPasswordScreen(Screen):
-    def check_input(self):
+    def __init__(self, **kwargs):
+        super(ForgotPasswordScreen, self).__init__(**kwargs)
+        self.forgotUsername = ""
+        self.forgotEmail = ""
+        self.code = None
+
+    def enter(self):
+        # This method is called just before the screen is displayed
         self.forgotUsername_input = self.ids.username_input
         self.forgotEmail_input = self.ids.email_input
         self.forgotUsername = self.forgotUsername_input.text
         self.forgotEmail = self.forgotEmail_input.text
-        self.code = code
+        self.code = None
 
+    def check_input(self):
+        self.enter()
+        self.get_forgot_info()
+        
         if (len(self.forgotUsername) >= self.forgotUsername_input.max_text_length) or (len(self.forgotEmail) >= self.forgotEmail_input.max_text_length):
             show_notification(True)
 
@@ -254,7 +264,7 @@ class ForgotPasswordScreen(Screen):
         user = FindUser(input_value=self.forgotUsername, search_key='Username')
         if user and self.forgotEmail == user.get('Email', ''):
             show_notification(False)
-            configBody = f"""Dear {user.get('Username', '')},
+            '''configBody = f"""Dear {user.get('Username', '')},
                         \n\t On the behalf of the Greenville Unitarian universalist fellowship or (GUUF) the application called GUUF IT DepartmentApp would like to inform you that you may have forgotten your password.
                         \n\t If you do not reconise this email, place name, or application name. Please feel free to block or remove this email. 
                         \n\t If you keep on geeting messages and do not reconise any information on this email, please: 
@@ -267,7 +277,7 @@ class ForgotPasswordScreen(Screen):
                         \n\t Thank you for your attention to this matter.
                         \n\t Best regards,
                         """
-            SenderInfo(email_receiver=user.get('Email', ''), subject="Forgot Password Detected", body=configBody)
+            SenderInfo(email_receiver=user.get('Email', ''), subject="Forgot Password Detected", body=configBody)'''
             app = MDApp.get_running_app()
             app.root.current = 'EnterCodeScreen'
         else:
@@ -276,6 +286,9 @@ class ForgotPasswordScreen(Screen):
     def clear(self):
         self.SignUpFullName_input.text = ""
         self.SignUpEmail_input.text = ""
+    
+    def get_forgot_info(self):
+        return [self.forgotUsername, self.forgotEmail, self.code]
 
 class EnterCodeScreen(Screen):
     def check_input(self):
@@ -283,6 +296,10 @@ class EnterCodeScreen(Screen):
         self.code_input = self.ids.code_input
         self.newPassword = self.newPasswordText_field.text
         self.codeInput = self.code_input.text
+        # ----
+        self.getInfo = ForgotPasswordScreen()
+        self.getInfo.get_forgot_info()
+        print(self.getInfo.get_forgot_info())
 
         if (len(self.newPassword) >= self.newPasswordText_field.max_text_length) or (len(self.codeInput) > self.code_input.max_text_length):
             show_notification(True)
@@ -290,24 +307,23 @@ class EnterCodeScreen(Screen):
         elif not self.newPassword or not self.codeInput:
             show_notification(True)
         
-        elif int(self.codeInput) != code:
+        elif int(self.codeInput) != 1000:
             show_notification(True)
         
         elif FindUser(input_value = self.newPassword, search_key = 'Password'):
             show_notification(True)
 
         else:
+            PrintDataBase()
             show_notification(False)
-            EditPerson()
             location = DeviceLocation()
             current_time = CurrentTime()
             device_info = DeviceInfo()
-            user = FindUser(input_value=self.LoginUsername, search_key='Username')
-            configBody = f"""Dear {user.get('Username', '')},
+            configBody = f"""Dear 'admin',
                         \n\t We are writing to inform you about recent login activity on your account. Details of the Login:
                         \n Date and Time: {location}
                         \n Location: {current_time}
-                        \n Device: {device_info[1]}, {device_info[0]}
+                        \n Device: {device_info}
                         \n
                         \n\t If you recognize this activity, you can disregard this email. However, if you do not recognize this login or suspect unauthorized access to your account, please take the following steps immediately:
                         \n\t 1) Change your password: Visit the app and go to the login page. Click on the "Forgot Password" link to reset your password. Choose a strong, unique password that you have not used elsewhere.
@@ -318,7 +334,14 @@ class EnterCodeScreen(Screen):
                         \n\t Thank you for your attention to this matter.
                         \n\t Best regards,
                         """
-            SenderInfo(email_receiver=user.get('Email', ''), subject="Login Detected", body=configBody)
+            # SenderInfo(email_receiver=user.get('Email', ''), subject="Login Detected", body=configBody)
+            # EditPerson(Username=Username, full_name=FindUser(input_value=Username, search_key="Full Name"), edit_info_name="Password", new_info=hash_password(self.newPassword))
+            self.clear()
+            PrintDataBase()
+
+    def clear(self):
+        self.newPasswordText_field.text = ""
+        self.code_input.text = ""
 
 class MainApp(MDApp):
     def build(self):
