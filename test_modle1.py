@@ -4,7 +4,7 @@ import os
 
 # connect
 def authenticate(username, email, password, full_name):
-    url = 'http://127.0.0.1:5000/authenticate'  # Replace with your server's IP address or domain
+    url = 'ServersIP'  # Replace with your server's IP address or domain
 
     data = {
         'username': username,
@@ -15,7 +15,7 @@ def authenticate(username, email, password, full_name):
 
     response = requests.post(url, json=data)
 
-    if response.status_code == 200:
+    if response.status_code == Code:
         result = response.json()
         print(result['message'])
     else:
