@@ -67,7 +67,7 @@ def verify_password(password, hashed_password):
         return password == hashed_password
 
 # pymongo database
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient("mongodbDataSheet_Name")
 db = client.neuraldb
 users = db.users
 
@@ -105,8 +105,8 @@ def is_valid_email(email):
 
 # send email 
 def SenderInfo(email_receiver, subject, body):
-    email_sender = "illindependent867@gmail.com"
-    email_password = "hmpa zbyh eclf dirz"
+    email_sender = "Email"
+    email_password = "emailPassword"
     email_receiver = email_receiver
 
     email = EmailMessage()
@@ -115,7 +115,7 @@ def SenderInfo(email_receiver, subject, body):
     email["Subject"] = subject
     email.set_content(body)
     context = ssl.create_default_context()
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context = context) as smtp:
+    with smtplib.SMTP_SSL('smtp.gmail.com', Number, context = context) as smtp:
         smtp.login(email_sender, email_password)
         smtp.sendmail(email_sender, email_receiver, email.as_string())
 
