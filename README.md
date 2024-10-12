@@ -1,6 +1,24 @@
 # GUUF_IT_DepartmentApp
-
 The Python code is a Kivy application for managing user authentication and registration for the "GUUF IT Department App", integrating functionalities like email sending and password hashing.
+
+[![Static Badge](https://img.shields.io/badge/platform-purple)](https://pypi.org/project/platform/)
+[![Static Badge](https://img.shields.io/badge/geopy-red)](https://pypi.org/project/geopy/)
+[![Static Badge](https://img.shields.io/badge/datetime-brown)](https://pypi.org/project/datetime/)
+[![Static Badge](https://img.shields.io/badge/email-red)](https://pypi.org/project/email/)
+[![Static Badge](https://img.shields.io/badge/pymongo-gray)](https://pypi.org/project/pymongo/)
+[![Static Badge](https://img.shields.io/badge/bcrypt,-orange)](https://pypi.org/project/bcrypt,/)
+[![Static Badge](https://img.shields.io/badge/ssl,-blue)](https://pypi.org/project/ssl,/)
+[![Static Badge](https://img.shields.io/badge/string-yellow)](https://pypi.org/project/string/)
+[![Static Badge](https://img.shields.io/badge/re,-green)](https://pypi.org/project/re,/)
+[![Static Badge](https://img.shields.io/badge/kivy-gray)](https://pypi.org/project/kivy/)
+[![Static Badge](https://img.shields.io/badge/kivymd-red)](https://pypi.org/project/kivymd/)
+[![Static Badge](https://img.shields.io/badge/flask-orange)](https://pypi.org/project/flask/)
+[![Static Badge](https://img.shields.io/badge/sqlite3-red)](https://pypi.org/project/sqlite3/)
+[![Static Badge](https://img.shields.io/badge/hashlib-blue)](https://pypi.org/project/hashlib/)
+[![Static Badge](https://img.shields.io/badge/flask-pink)](https://pypi.org/project/flask/)
+[![Static Badge](https://img.shields.io/badge/requests-orange)](https://pypi.org/project/requests/)
+[![Static Badge](https://img.shields.io/badge/sqlite3-blue)](https://pypi.org/project/sqlite3/)
+[![Static Badge](https://img.shields.io/badge/os-green)](https://pypi.org/project/os/)
 
 ## Table of Contents
 
